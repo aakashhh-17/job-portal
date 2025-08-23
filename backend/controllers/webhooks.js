@@ -1,10 +1,12 @@
 import { Webhook } from "svix";
 import User from "../models/User.js";
+import connectDB from "../config/db.js";
 
 // API controller function to manage Clerk user with database
 export const clerkWebhooks = async (req, res) => {
   try {
 
+    await connectDB();
     // Create svix instance with clerk webhook secret
     const whook = new Webhook(process.env.CLERK_WEBHOOK_SECRET);
 
