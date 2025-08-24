@@ -1,12 +1,10 @@
 import { Webhook } from "svix";
 import User from "../models/User.js";
-import connectDB from "../config/db.js";
 
 // API controller function to manage Clerk user with database
 export const clerkWebhooks = async (req, res) => {
   try {
 
-    await connectDB();
     // Create svix instance with clerk webhook secret
     const whook = new Webhook(process.env.CLERK_WEBHOOK_SECRET);
 
@@ -17,8 +15,9 @@ export const clerkWebhooks = async (req, res) => {
         "svix-signature": req.headers["svix-signature"]
     })
 
+
     // Getting data from request body
-    const {data, type} = req.body
+    const {data, type} = req.body;
 
     // Switch cases for different types
     switch (type) {
@@ -34,7 +33,7 @@ export const clerkWebhooks = async (req, res) => {
         await User.create(userData);
         res.json({});
         break;
-      }
+      } 
 
       case 'user.updated': {
         const userData = {
