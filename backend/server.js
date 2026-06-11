@@ -2,6 +2,7 @@ import express from 'express'
 import cors from 'cors'
 import dotenv from 'dotenv'
 dotenv.config();
+import { setServers } from "node:dns/promises";
 import connectDB from './config/db.js';
 import { clerkWebhooks } from './controllers/webhooks.js';
 import connectCloudinary from './config/cloudinary.js';
@@ -9,6 +10,8 @@ import companyRoutes from './routes/companyRoutes.js'
 import jobRoutes from './routes/jobRoutes.js'
 import userRoutes from './routes/userRoutes.js'
 import {clerkMiddleware} from '@clerk/express'
+
+setServers(["1.1.1.1", "8.8.8.8"]);
 
 // Initialize express
 const app=express();
