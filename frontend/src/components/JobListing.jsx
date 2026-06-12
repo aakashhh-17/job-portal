@@ -6,7 +6,7 @@ import JobCard from "./JobCard";
 import { Link } from "react-router-dom";
 
 const JobListing = () => {
-  const { isSearched, searchFilter, setSearchFilter, jobs } =
+  const { isSearched, searchFilter, setSearchFilter, jobs, userData } =
     useContext(AppContext);
 
   const [showFilter, setShowFilter] = useState(false);
@@ -14,6 +14,7 @@ const JobListing = () => {
   const [selectedCategories, setSelectedCategories] = useState([]);
   const [selectedLocations, setSelectedLocations] = useState([]);
   const [filteredJobs, setFilteredJobs] = useState(jobs);
+  const [bookmarked, setBookmarked] = useState(false);
 
   const handleCategoryChange = (category) => {
     setSelectedCategories((prev) =>
@@ -48,6 +49,7 @@ const JobListing = () => {
       searchFilter.location === "" ||
       job.location.toLowerCase().includes(searchFilter.location.toLowerCase());
 
+
     const newFilteredJobs = jobs
       .slice()
       .reverse()
@@ -59,9 +61,12 @@ const JobListing = () => {
           matchesTitle(job)
       );
 
-    setFilteredJobs(newFilteredJobs);
+    const allValidJobs = bookmarked ? newFilteredJobs.filter(job => userData.bookmarkedJobs.includes(job._id)) : newFilteredJobs;
+
+    // setFilteredJobs(newFilteredJobs);
+    setFilteredJobs(allValidJobs);
     setCurrentPage(1);
-  }, [jobs, selectedCategories, selectedLocations, searchFilter]);
+  }, [jobs, selectedCategories, selectedLocations, searchFilter, bookmarked, userData]);
 
   return (
     <div className="container 2xl:px-20 mx-auto flex flex-col lg:flex-row max-lg:space-y-8 py-8">
@@ -105,6 +110,10 @@ const JobListing = () => {
         >
           {showFilter ? "Close" : "Filters"}
         </button>
+
+        <div className={showFilter ? "flex flex-row " : "max-lg:hidden"}>
+          <input type="checkbox" name="bookmark" checked={bookmarked} onChange={() => setBookmarked(prev => !prev)} /> Bookmarked Jobs
+        </div>
 
         {/* Category filter */}
         <div className={showFilter ? "" : "max-lg:hidden"}>

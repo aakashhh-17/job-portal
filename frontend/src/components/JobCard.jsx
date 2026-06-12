@@ -21,12 +21,9 @@ const JobCard = ({job}) => {
           Authorization: `Bearer ${token}`
         }}
       );
-      console.log(job._id);
-
-      console.log("clicked bookmark", data);
       
       if(data.success ){
-        toast.success("Bookmarked updated");
+        toast.success(data.message);
         console.log(data.message);
         if(data.bookmarked == true) setBookmark(true);
         if(data.bookmarked == false) setBookmark(false); 

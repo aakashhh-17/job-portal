@@ -41,12 +41,10 @@ export const applyForJob = async (req, res) => {
       .status(201)
       .json({ success: true, message: "Applied successfully", data: newJob });
   } catch (error) {
-    res
-      .status(201)
-      .json({
-        success: false,
-        message: `Error in applyForJob: ${error.message}`,
-      });
+    res.status(201).json({
+      success: false,
+      message: `Error in applyForJob: ${error.message}`,
+    });
   }
 };
 
@@ -65,12 +63,10 @@ export const getUserJobApplications = async (req, res) => {
 
     return res.json({ success: true, applications });
   } catch (error) {
-    res
-      .status(201)
-      .json({
-        success: false,
-        message: `Error in getUserJobApplications: ${error.message}`,
-      });
+    res.status(201).json({
+      success: false,
+      message: `Error in getUserJobApplications: ${error.message}`,
+    });
   }
 };
 
@@ -111,16 +107,40 @@ export const bookmarkJob = async (req, res) => {
         (id) => id !== jobId,
       );
       await userData.save();
-      return res.json({ success: true, message: "Job removed from bookmarks", bookmarked: false });
+      return res.json({
+        success: true,
+        message: "Job removed from bookmarks",
+        bookmarked: false,
+      });
     } else {
       userData.bookmarkedJobs.push(jobId);
       await userData.save();
-      return res.json({ success: true, message: "Job added to bookmarks", bookmarked: true });
+      return res.json({
+        success: true,
+        message: "Job added to bookmarks",
+        bookmarked: true,
+      });
     }
   } catch (error) {
     res.json({
       success: false,
       message: `Error in bookmarkJob: ${error.message}`,
     });
+  }
+};
+
+export const getBookmarkedJobs = async (req, res) => {
+  try {
+    const userId = req.auth.userId;
+
+    const userData = await User.findById(userId).populate("bookmarkedJobs");
+    if (!userData)
+      return res
+        .status(404)
+        .json({ success: false, message: "User not found" });
+
+    res.json({ success: true, bookmarkedJobs: userData.bookmarkedJobs });
+  } catch (error) {
+    res.status(500).json({ success: false, message: `Error in getBookmarkedJobs: ${error.message}` });
   }
 };
