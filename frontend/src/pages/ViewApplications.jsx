@@ -42,7 +42,7 @@ const ViewApplications = () => {
   useEffect(()=>{
     if(companyToken){
       fetchApplicants();
-    console.log(applicants.length > 0 && applicants);
+    // console.log(applicants.length > 0 && applicants);
     }
   },[companyToken,]);
   
@@ -83,14 +83,17 @@ const ViewApplications = () => {
                     Resume <img src={applicant.userId.resume} alt="" />
                   </a>
                 </td>
-                <td className='py-2 px-4 border-b border-gray-200 relative'>
-                  <div className='relative inline-block text-left group'>
-                    <button className={`${applicant.status === 'Accepted' ? 'text-green-500' : ''} ${applicant.status === 'Rejected' ? 'text-red-500' : ''} text-gray-500 action-button`}>{applicant.status !== 'Pending' && applicant.status}</button>
-                    <div  className='z-10 absolute hidden right-0 md:left-0 top-0 mt-2 w-32 bg-white border border-gray-200 rounded shadow group-hover:block'>
-                      <button onClick={()=>handleChangeStatus(applicant._id, 'Accepted')} className='block w-full px-4 py-2 text-left text-blue-500 hover:bg-gray-100'>Accept</button>
-                      <button onClick={()=>handleChangeStatus(applicant._id,'Rejected')} className='block w-full px-4 py-2 text-left text-red-500 hover:bg-gray-100'>Reject</button>
+                <td className='py-2 px-4 border-b border-gray-200'>
+                  {applicant.status === 'Pending' ? (
+                    <div className='flex gap-2'>
+                      <button onClick={()=>handleChangeStatus(applicant._id, 'Accepted')} className='px-3 py-1 bg-green-500 text-white rounded text-sm hover:bg-green-600'>Accept</button>
+                      <button onClick={()=>handleChangeStatus(applicant._id,'Rejected')} className='px-3 py-1 bg-red-500 text-white rounded text-sm hover:bg-red-600'>Reject</button>
                     </div>
-                  </div>
+                  ) : (
+                    <span className={`px-3 py-1 rounded text-sm font-semibold ${applicant.status === 'Accepted' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
+                      {applicant.status}
+                    </span>
+                  )}
                 </td>
               </tr>
             ))}

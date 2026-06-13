@@ -4,6 +4,7 @@ import { v2 as cloudinary } from "cloudinary";
 import generateToken from "../utils/generateToken.js";
 import Job from "../models/Job.js";
 import JobApplication from "../models/jobApplication.js";
+import { sendStatusChangeEmail } from "../utils/emailService.js";
 
 export const registerCompany = async (req, res) => {
   const { name, email, password } = req.body;
@@ -156,7 +157,7 @@ export const getCompanyPostedJobs = async (req, res) => {
       jobs.map(async (job) => {
         const applicants = await JobApplication.find({ jobId: job._id });
         return { ...job.toObject(), applicants: applicants.length };
-      })
+      }),
     );
 
     res.json({ success: true, jobsData });
@@ -171,18 +172,40 @@ export const getCompanyPostedJobs = async (req, res) => {
 export const changeJobApplicationStatus = async (req, res) => {
   try {
     const companyId = req.company._id;
-  const {applicationId, newStatus} = req.body;
+    const { applicationId, newStatus } = req.body;
 
-  const jobApplicationData = await JobApplication.findById(applicationId);
-  if(!jobApplicationData) return res.json({success:false, message: 'Job not found'});
+    const jobApplicationData = await JobApplication.findById(applicationId)
+    .populate('userId', 'name email').populate('jobId', 'title').populate('companyId', 'name');
 
-  const newJobApplicationData = await JobApplication.findByIdAndUpdate(applicationId, {
-    status: newStatus
-  },{new: true});
+    if (!jobApplicationData)
+      return res.json({ success: false, message: "Job not found" });
 
-  return res.json({success: true, newJobApplicationData, message: 'Status updated'});
+    jobApplicationData.status = newStatus;
+    await jobApplicationData.save();
+
+    // console.log(jobApplicationData);
+    // console.log(jobApplicationData.userId.name);
+
+    // Send email — fire and forget so a mail failure never breaks the API
+    sendStatusChangeEmail({
+      toEmail:     jobApplicationData.userId.email,
+      userName:    jobApplicationData.userId.name,
+      jobTitle:    jobApplicationData.jobId.title,
+      companyName: jobApplicationData.companyId.name,
+      newStatus,
+    }).catch(err => console.error('Email send failed:', err.message));
+
+
+    return res.json({
+      success: true,
+      newJobApplicationData: jobApplicationData,
+      message: `Status updated to ${newStatus}`,
+    });
   } catch (error) {
-    return res.status(500).json({success: false, message: 'Internal server error'});
+    console.log(error);
+    return res
+      .status(500)
+      .json({ success: false, message: "Internal server error" });
   }
 };
 
