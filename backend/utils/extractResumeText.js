@@ -1,20 +1,11 @@
-import { PDFParse } from 'pdf-parse';
+import { createRequire } from 'module';
+const require = createRequire(import.meta.url);
+const pdf = require('pdf-parse/lib/pdf-parse.js');
+
 import axios from 'axios';
 
 export const extractResumeText = async (resumeUrl) => {
-  const response = await axios.get(resumeUrl, {
-    responseType: 'arraybuffer',
-  });
-
-  const parser = new PDFParse({
-    data: Buffer.from(response.data),
-  });
-
-  const result = await parser.getText();
-
-  await parser.destroy();
-
-  return result.text;
+  const response = await axios.get(resumeUrl, { responseType: 'arraybuffer' });
+  const data = await pdf(response.data);
+  return data.text;
 };
-
-export default extractResumeText;
