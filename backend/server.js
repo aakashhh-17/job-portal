@@ -10,6 +10,7 @@ import companyRoutes from './routes/companyRoutes.js'
 import jobRoutes from './routes/jobRoutes.js'
 import userRoutes from './routes/userRoutes.js'
 import {clerkMiddleware} from '@clerk/express'
+import aiRoutes from './routes/aiRoutes.js'
 
 setServers(["1.1.1.1", "8.8.8.8"]);
 
@@ -33,6 +34,7 @@ app.post('/webhooks', clerkWebhooks);
 app.use('/api/company', companyRoutes)
 app.use('/api/jobs', jobRoutes)
 app.use('/api/users', userRoutes);
+app.use('/api/ai', aiRoutes);
 
 // Port
 const PORT = process.env.PORT ;

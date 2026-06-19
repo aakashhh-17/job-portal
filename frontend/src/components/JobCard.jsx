@@ -34,7 +34,7 @@ const JobCard = ({job}) => {
   }
 
   useEffect(()=>{
-    console.log(userData);
+    // console.log(userData);
     if(userData && userData?.bookmarkedJobs?.includes(job._id)){
       setBookmark(true);
     }else{
