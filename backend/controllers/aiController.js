@@ -5,7 +5,7 @@ import { generateMatchScore } from '../services/aiService.js';
 
 export const matchResumeToJob = async (req, res) => {
   try {
-    const userId = req.auth.userId;
+    const userId = req.userId;
     const { jobId } = req.body;
 
     const [user, job] = await Promise.all([

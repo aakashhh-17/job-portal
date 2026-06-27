@@ -109,7 +109,7 @@ export const bookmarkJob = async (req, res) => {
 
     if (userData.bookmarkedJobs.map(id => id.toString()).includes(jobId)) {
       userData.bookmarkedJobs = userData.bookmarkedJobs.filter(
-        (id) => id !== jobId,
+        (id) => id.toString() !== jobId
       );
       await userData.save();
       return res.json({

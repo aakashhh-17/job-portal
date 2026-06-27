@@ -136,14 +136,20 @@ export const getCompanyJobApplicants = async (req, res) => {
     const companyId = req.company._id;
 
     const applicantsData = await JobApplication.find({ companyId })
-      .populate("userId", "image name resume")
+      .populate("userId", "image name resume email")  // add email for status emails
       .populate("jobId", "title location");
 
-    return res.status(200).json({ success: true, applicantsData });
+    // Filter out any where user or job was deleted
+    const validApplicants = applicantsData.filter(
+      (app) => app.userId !== null && app.jobId !== null
+    );
+
+    // console.log("Applicants fetched:", applicantsData.length);
+    // console.log("Sample:", JSON.stringify(applicantsData[0], null, 2));
+
+    return res.status(200).json({ success: true, applicantsData: validApplicants });
   } catch (error) {
-    return res
-      .status(500)
-      .json({ success: false, message: "Internal server error" });
+    return res.status(500).json({ success: false, message: error.message });
   }
 };
 

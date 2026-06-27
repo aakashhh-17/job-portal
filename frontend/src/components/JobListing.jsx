@@ -60,11 +60,11 @@ const JobListing = () => {
           matchesTitle(job),
       );
 
-    const allValidJobs = bookmarked
-      ? newFilteredJobs.filter((job) =>
-          userData.bookmarkedJobs.includes(job._id),
-        )
-      : newFilteredJobs;
+    const allValidJobs = bookmarked && userData?.bookmarkedJobs?.length
+  ? newFilteredJobs.filter((job) =>
+      userData.bookmarkedJobs.map(id => id.toString()).includes(job._id.toString())
+    )
+  : newFilteredJobs;
 
     // setFilteredJobs(newFilteredJobs);
     setFilteredJobs(allValidJobs);

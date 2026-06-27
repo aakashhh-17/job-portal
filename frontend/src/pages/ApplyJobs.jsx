@@ -10,7 +10,7 @@ import JobCard from "../components/JobCard";
 import Footer from "../components/Footer";
 import axios from "axios";
 import toast from "react-hot-toast";
-import { useAuth } from "@clerk/clerk-react";
+// import { useAuth } from "@clerk/clerk-react";
 
 const ApplyJobs = () => {
   const { id } = useParams();
@@ -85,7 +85,7 @@ const ApplyJobs = () => {
       }
 
       // const token = await getToken();
-      
+
       const { data } = await axios.post(
         backendUrl + "/api/users/apply",
         { jobId: id },
