@@ -4,7 +4,7 @@ import User from "../models/User.js";
 import { v2 as cloudinary } from "cloudinary";
 
 export const getUserData = async (req, res) => {
-  const userId = req.auth.userId;
+  const userId = req.userId;
 
   try {
     const user = await User.findById(userId);
@@ -20,7 +20,9 @@ export const getUserData = async (req, res) => {
 
 export const applyForJob = async (req, res) => {
   const { jobId } = req.body;
-  const userId = req.auth.userId;
+  // const userId = req.auth.userId;
+  const userId = req.userId;
+
   try {
     const isAlreadyApplied = await JobApplication.find({ jobId, userId });
     if (isAlreadyApplied.length > 0) {
@@ -50,7 +52,8 @@ export const applyForJob = async (req, res) => {
 
 export const getUserJobApplications = async (req, res) => {
   try {
-    const userId = req.auth.userId;
+    const userId = req.userId;
+    // const userId = req.auth.userId;
     const applications = await JobApplication.find({ userId })
       .populate("companyId", "name email image")
       .populate("jobId", "title description location salary category level")
@@ -72,7 +75,8 @@ export const getUserJobApplications = async (req, res) => {
 
 export const updateUserResume = async (req, res) => {
   try {
-    const userId = req.auth.userId;
+    const userId = req.userId;
+    // const userId = req.auth.userId;
     const resumeFile = req.file;
     const userData = await User.findById(userId);
 
@@ -95,14 +99,15 @@ export const updateUserResume = async (req, res) => {
 
 export const bookmarkJob = async (req, res) => {
   try {
-    const userId = req.auth.userId;
+    const userId = req.userId;
+    // const userId = req.auth.userId;
     const { jobId } = req.body;
 
     const userData = await User.findById(userId);
     if (!userData)
       return res.json({ success: false, message: "User not found" });
 
-    if (userData.bookmarkedJobs.includes(jobId)) {
+    if (userData.bookmarkedJobs.map(id => id.toString()).includes(jobId)) {
       userData.bookmarkedJobs = userData.bookmarkedJobs.filter(
         (id) => id !== jobId,
       );
@@ -131,7 +136,8 @@ export const bookmarkJob = async (req, res) => {
 
 export const getBookmarkedJobs = async (req, res) => {
   try {
-    const userId = req.auth.userId;
+    const userId = req.userId;
+    // const userId = req.auth.userId;
 
     const userData = await User.findById(userId).populate("bookmarkedJobs");
     if (!userData)

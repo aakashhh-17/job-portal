@@ -43,7 +43,7 @@ export const registerCompany = async (req, res) => {
         email: company.email,
         image: company.image,
       },
-      token: generateToken(company._id),
+      token: generateToken(company._id, 'company'),
     });
   } catch (error) {
     return res.status(500).json({
@@ -72,7 +72,7 @@ export const loginCompany = async (req, res) => {
           email: company.email,
           image: company.image,
         },
-        token: generateToken(company._id),
+        token: generateToken(company._id, 'company'),
       });
     } else {
       res.json({

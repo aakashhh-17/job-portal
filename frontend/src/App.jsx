@@ -11,16 +11,18 @@ import ManageJobs from './pages/ManageJobs'
 import ViewApplications from './pages/ViewApplications'
 import 'quill/dist/quill.snow.css'
 import toast, { Toaster } from 'react-hot-toast';
+import CandidateLogin from './components/CandidateLogin'
 
 
 
 function App() {
-  const {showRecruiterLogin, companyToken} = useContext(AppContext)
+  const {showRecruiterLogin, showCandidateLogin, companyToken} = useContext(AppContext)
 
   return (
     <div>
       <Toaster />
       {showRecruiterLogin && <RecruiterLogin />}
+      {showCandidateLogin && <CandidateLogin />}  
     <Routes>
       <Route path='/' element={<Home />} />
       <Route path='/apply-job/:id' element={<ApplyJobs />} />

@@ -20,7 +20,7 @@ const JobListing = () => {
     setSelectedCategories((prev) =>
       selectedCategories.includes(category)
         ? prev.filter((c) => c !== category)
-        : [...prev, category]
+        : [...prev, category],
     );
   };
 
@@ -28,7 +28,7 @@ const JobListing = () => {
     setSelectedLocations((prev) =>
       selectedLocations.includes(location)
         ? prev.filter((c) => c !== location)
-        : [...prev, location]
+        : [...prev, location],
     );
   };
 
@@ -49,7 +49,6 @@ const JobListing = () => {
       searchFilter.location === "" ||
       job.location.toLowerCase().includes(searchFilter.location.toLowerCase());
 
-
     const newFilteredJobs = jobs
       .slice()
       .reverse()
@@ -58,15 +57,26 @@ const JobListing = () => {
           matchesCategory(job) &&
           matchesLocation(job) &&
           matchesSearchLocation(job) &&
-          matchesTitle(job)
+          matchesTitle(job),
       );
 
-    const allValidJobs = bookmarked ? newFilteredJobs.filter(job => userData.bookmarkedJobs.includes(job._id)) : newFilteredJobs;
+    const allValidJobs = bookmarked
+      ? newFilteredJobs.filter((job) =>
+          userData.bookmarkedJobs.includes(job._id),
+        )
+      : newFilteredJobs;
 
     // setFilteredJobs(newFilteredJobs);
     setFilteredJobs(allValidJobs);
     setCurrentPage(1);
-  }, [jobs, selectedCategories, selectedLocations, searchFilter, bookmarked, userData]);
+  }, [
+    jobs,
+    selectedCategories,
+    selectedLocations,
+    searchFilter,
+    bookmarked,
+    userData,
+  ]);
 
   return (
     <div className="container 2xl:px-20 mx-auto flex flex-col lg:flex-row max-lg:space-y-8 py-8">
@@ -111,9 +121,16 @@ const JobListing = () => {
           {showFilter ? "Close" : "Filters"}
         </button>
 
-        <div className={showFilter ? "flex flex-row " : "max-lg:hidden"}>
-          <input type="checkbox" name="bookmark" checked={bookmarked} onChange={() => setBookmarked(prev => !prev)} /> Bookmarked Jobs
-        </div>
+        
+          <div className={showFilter ? "flex flex-row " : "max-lg:hidden"}>
+            <input
+              type="checkbox"
+              name="bookmark"
+              checked={bookmarked}
+              onChange={() => setBookmarked((prev) => !prev)}
+            />{" "}
+            Bookmarked Jobs
+          </div>
 
         {/* Category filter */}
         <div className={showFilter ? "" : "max-lg:hidden"}>
@@ -191,7 +208,7 @@ const JobListing = () => {
                     {index + 1}
                   </button>
                 </a>
-              )
+              ),
             )}
             <a href="#job-list">
               {" "}

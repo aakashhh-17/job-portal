@@ -26,10 +26,11 @@ const ApplyJobs = () => {
     userData,
     userApplications,
     fetchUserApplications,
+    candidateToken,
   } = useContext(AppContext);
   const navigate = useNavigate();
 
-  const { getToken } = useAuth();
+  // const { getToken } = useAuth();
 
   const checkMatch = async () => {
     if (matchCache[id]) {
@@ -39,11 +40,11 @@ const ApplyJobs = () => {
 
     setLoadingMatch(true);
     try {
-      const token = await getToken();
+      // const token = await getToken();
       const { data } = await axios.post(
         backendUrl + "/api/ai/match-resume",
         { jobId: id },
-        { headers: { Authorization: `Bearer ${token}` } }
+        { headers: { Authorization: `Bearer ${candidateToken}` } },
       );
       if (data.success) {
         setMatchCache((prev) => ({
@@ -83,11 +84,12 @@ const ApplyJobs = () => {
         return toast.error("Upload your resume first");
       }
 
-      const token = await getToken();
+      // const token = await getToken();
+      
       const { data } = await axios.post(
         backendUrl + "/api/users/apply",
         { jobId: id },
-        { headers: { Authorization: `Bearer ${token}` } },
+        { headers: { Authorization: `Bearer ${candidateToken}` } },
       );
 
       if (data.success) {
@@ -163,7 +165,11 @@ const ApplyJobs = () => {
               <button
                 onClick={checkMatch}
                 disabled={!userData?.resume || loadingMatch}
-                title={!userData?.resume ? "Upload your resume to check match score" : ""}
+                title={
+                  !userData?.resume
+                    ? "Upload your resume to check match score"
+                    : ""
+                }
                 className={`px-10 py-2 text-sm rounded ${
                   !userData?.resume || loadingMatch
                     ? "bg-gray-300 text-gray-600 cursor-not-allowed"
@@ -198,21 +204,23 @@ const ApplyJobs = () => {
                         matchCache[id].score >= 70
                           ? "text-green-600"
                           : matchCache[id].score >= 40
-                          ? "text-yellow-600"
-                          : "text-red-600"
+                            ? "text-yellow-600"
+                            : "text-red-600"
                       }`}
                     >
                       {matchCache[id].score}
                     </div>
-                    <div className="text-sm text-gray-600 mt-1">Match Score</div>
+                    <div className="text-sm text-gray-600 mt-1">
+                      Match Score
+                    </div>
                   </div>
                   <div
                     className={`flex-1 h-3 rounded-full ${
                       matchCache[id].score >= 70
                         ? "bg-green-100"
                         : matchCache[id].score >= 40
-                        ? "bg-yellow-100"
-                        : "bg-red-100"
+                          ? "bg-yellow-100"
+                          : "bg-red-100"
                     }`}
                   >
                     <div
@@ -220,8 +228,8 @@ const ApplyJobs = () => {
                         matchCache[id].score >= 70
                           ? "bg-green-600"
                           : matchCache[id].score >= 40
-                          ? "bg-yellow-600"
-                          : "bg-red-600"
+                            ? "bg-yellow-600"
+                            : "bg-red-600"
                       }`}
                       style={{ width: `${matchCache[id].score}%` }}
                     ></div>
@@ -230,9 +238,12 @@ const ApplyJobs = () => {
               </div>
 
               <div className="mb-6">
-                <h4 className="font-semibold text-gray-700 mb-3">Matched Skills</h4>
+                <h4 className="font-semibold text-gray-700 mb-3">
+                  Matched Skills
+                </h4>
                 <div className="flex flex-wrap gap-2">
-                  {matchCache[id].matchedSkills && matchCache[id].matchedSkills.length > 0 ? (
+                  {matchCache[id].matchedSkills &&
+                  matchCache[id].matchedSkills.length > 0 ? (
                     matchCache[id].matchedSkills.map((skill, index) => (
                       <span
                         key={index}
@@ -248,9 +259,12 @@ const ApplyJobs = () => {
               </div>
 
               <div className="mb-6">
-                <h4 className="font-semibold text-gray-700 mb-3">Missing Skills</h4>
+                <h4 className="font-semibold text-gray-700 mb-3">
+                  Missing Skills
+                </h4>
                 <div className="flex flex-wrap gap-2">
-                  {matchCache[id].missingSkills && matchCache[id].missingSkills.length > 0 ? (
+                  {matchCache[id].missingSkills &&
+                  matchCache[id].missingSkills.length > 0 ? (
                     matchCache[id].missingSkills.map((skill, index) => (
                       <span
                         key={index}

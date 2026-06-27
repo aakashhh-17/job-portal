@@ -4,12 +4,12 @@ import { Link, useNavigate } from "react-router-dom";
 import { AppContext } from "../context/AppContext";
 
 const Navbar = () => {
-  const {openSignIn} = useClerk();
+  // const {openSignIn} = useClerk();
 
-  const {user} = useUser();
+  // const {user} = useUser();
   const navigate = useNavigate();
 
-  const {setShowRecruiterLogin} = useContext(AppContext);
+  const {setShowRecruiterLogin, userData, candidateLogout, setShowCandidateLogin} = useContext(AppContext);
 
 
   return (
@@ -17,19 +17,34 @@ const Navbar = () => {
       <div className='container px-4 2xl:px-20 mx-auto flex justify-between items-center '>
       <p onClick={()=> navigate('/')} className='text-3xl cursor-pointer'><span className='font-bold'>Career</span>Bridge</p>
 
-      {user ? (
-        <div className="flex items-center gap-2">
-          <Link to={'/applications'}>Applied jobs</Link>
-          <p>|</p>
-          <p className="max-sm:hidden">Hi, {user.firstName + " " + user.lastName}</p>
-          <UserButton />
-        </div>
-      ) : (
-        <div className='flex gap-4 max-sm:text-xs items-center'>
-        <button onClick={(e)=> setShowRecruiterLogin(true)} className='text-gray-600 cursor-pointer'>Recruiter Login</button>
-        <button onClick={ e => openSignIn()} className='px-6 py-2 sm:px-9 bg-blue-600 text-white rounded-full cursor-pointer'>Login</button>
-      </div>
-      )}
+      {userData ? (
+  <div className="flex items-center gap-3">
+    <Link to="/applications">Applied Jobs |</Link>
+    <img
+      className="w-8 rounded-full"
+      src={userData.image || assets.upload_area}
+      alt=""
+    />
+    <button
+      onClick={candidateLogout}
+      className="text-sm text-gray-500 border border-gray-300 px-3 py-1 rounded-full"
+    >
+      Logout
+    </button>
+  </div>
+) : (
+  <div className="flex gap-4 max-sm:text-xs items-center">
+    <button onClick={() => setShowRecruiterLogin(true)} className="text-gray-600">
+      Recruiter Login |
+    </button>
+    <button
+      onClick={() => setShowCandidateLogin(true)}  
+      className="px-4 py-1 sm:px-9 bg-blue-600 text-white rounded-full"
+    >
+      Login
+    </button>
+  </div>
+)}
 
       </div>
     </div>
