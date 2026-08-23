@@ -5,13 +5,24 @@ const jobSchema = new mongoose.Schema({
     description: {type:String, required:true},
     location: {type:String, required:true},
     category: {type:String, required:true},
-    level: {type:String, required:true},
-    salary: {type:Number, required:true},
+    level: {type:String, default: 'Not specified'},        // was required:true
+    salary: {type:Number, default: 0},                      // was required:true
     date: {type:Number, required:true},
     visible: {type:Boolean, default:true},
-    companyId: {type: mongoose.Schema.Types.ObjectId, ref: 'Company', required:true}
+    companyId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Company',
+        required: function () { return this.source === 'internal'; }
+    },
+    // NEW: external ingestion fields
+    source: { type: String, enum: ['internal', 'adzuna'], default: 'internal' },
+    externalId: { type: String },
+    sourceUrl: { type: String },       // link back to the original posting
+    companyName: { type: String },     // denormalized, for jobs with no Company doc
+    companyLogo: { type: String },
 })
 
-const Job = mongoose.model('Job', jobSchema);
+jobSchema.index({ source: 1, externalId: 1 }, { unique: true, sparse: true });
 
+const Job = mongoose.model('Job', jobSchema);
 export default Job;

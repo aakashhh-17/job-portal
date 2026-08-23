@@ -1,20 +1,20 @@
-import { HeartIcon, Link } from "lucide-react";
+import { HeartIcon, Building2, ExternalLink } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { AppContext } from "../context/AppContext";
 import { useContext, useEffect, useState } from "react";
 import toast from "react-hot-toast";
-// import { useAuth } from "@clerk/clerk-react";
 
 const JobCard = ({ job }) => {
   const navigate = useNavigate();
-  // const { getToken } = useAuth();
-  const { backendUrl, userData, candidateToken  } = useContext(AppContext);
+  const { backendUrl, userData, candidateToken } = useContext(AppContext);
   const [bookmark, setBookmark] = useState(false);
 
-  const handleBookmark = async () => {
-    // const token = await getToken();
+  const isExternal = job.source === "adzuna";
+  const companyName = job.companyId?.name || job.companyName || "Company";
+  const companyLogo = job.companyId?.image || job.companyLogo;
 
+  const handleBookmark = async () => {
     try {
       const { data } = await axios.post(
         backendUrl + "/api/users/bookmark",
@@ -24,7 +24,6 @@ const JobCard = ({ job }) => {
 
       if (data.success) {
         toast.success(data.message);
-        console.log(data.message);
         if (data.bookmarked == true) setBookmark(true);
         if (data.bookmarked == false) setBookmark(false);
       }
@@ -34,7 +33,6 @@ const JobCard = ({ job }) => {
   };
 
   useEffect(() => {
-    // console.log(userData);
     if (userData?.bookmarkedJobs?.map(id => id.toString()).includes(job._id.toString())) {
       setBookmark(true);
     } else {
@@ -45,7 +43,13 @@ const JobCard = ({ job }) => {
   return (
     <div className="p-6 flex flex-col shadow bg-white rounded ">
       <div className="flex flex-row justify-between">
-        <img className="size-8 mb-2" src={job.companyId.image} alt="" />
+        {companyLogo ? (
+          <img className="size-8 mb-2" src={companyLogo} alt="" />
+        ) : (
+          <div className="size-8 mb-2 rounded bg-gray-100 flex items-center justify-center">
+            <Building2 className="size-4 text-gray-400" />
+          </div>
+        )}
         <HeartIcon
           onClick={() => handleBookmark()}
           className={
@@ -55,29 +59,46 @@ const JobCard = ({ job }) => {
           }
         />
       </div>
-      <p className="font-semibold text-lg mb-3">{job.title}</p>
-      <div className="flex gap-3 text-xs font-medium mb-3 ">
+      <p className="font-semibold text-lg mb-1">{job.title}</p>
+      <p className="text-sm text-gray-500 mb-3">{companyName}</p>
+      <div className="flex gap-3 text-xs font-medium mb-3 flex-wrap">
         <span className=" text-md bg-blue-50 border text-gray-700 border-blue-200 px-3 py-1.5 rounded">
           {job.location}
         </span>
         <span className=" text-md bg-red-50 border text-gray-700 border-red-200 px-3 py-1.5 rounded">
           {job.level}
         </span>
+        {isExternal && (
+          <span className="flex items-center gap-1 text-md bg-amber-50 border text-amber-700 border-amber-200 px-3 py-1.5 rounded">
+            <ExternalLink className="size-3" /> External
+          </span>
+        )}
       </div>
       <p
         className="text-sm text-gray-500 mb-3"
         dangerouslySetInnerHTML={{ __html: job.description.slice(0, 150) }}
       ></p>
       <div>
-        <button
-          onClick={() => {
-            navigate(`/apply-job/${job._id}`);
-            scrollTo(0, 0);
-          }}
-          className="py-2 px-3 rounded bg-blue-600 text-white text-sm cursor-pointer"
-        >
-          Apply now
-        </button>
+        {isExternal ? (
+          <a
+            href={job.sourceUrl}
+            target="_blank"
+            rel="noreferrer"
+            className="inline-block py-2 px-3 rounded bg-blue-600 text-white text-sm cursor-pointer"
+          >
+            Apply now
+          </a>
+        ) : (
+          <button
+            onClick={() => {
+              navigate(`/apply-job/${job._id}`);
+              scrollTo(0, 0);
+            }}
+            className="py-2 px-3 rounded bg-blue-600 text-white text-sm cursor-pointer"
+          >
+            Apply now
+          </button>
+        )}
 
         <button
           onClick={() => {

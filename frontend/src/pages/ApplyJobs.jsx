@@ -1,16 +1,15 @@
-import React, { useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { AppContext } from "../context/AppContext";
 import Loading from "../components/Loading";
 import Navbar from "../components/Navbar";
-import { BriefcaseBusiness, MapPin, User, Wallet } from "lucide-react";
+import { BriefcaseBusiness, Building2, ExternalLink, MapPin, User, Wallet } from "lucide-react";
 import digitsToK from "../utils/digitsToK";
 import moment from "moment";
 import JobCard from "../components/JobCard";
 import Footer from "../components/Footer";
 import axios from "axios";
 import toast from "react-hot-toast";
-// import { useAuth } from "@clerk/clerk-react";
 
 const ApplyJobs = () => {
   const { id } = useParams();
@@ -30,8 +29,6 @@ const ApplyJobs = () => {
   } = useContext(AppContext);
   const navigate = useNavigate();
 
-  // const { getToken } = useAuth();
-
   const checkMatch = async () => {
     if (matchCache[id]) {
       setIsMatchExpanded(true);
@@ -40,7 +37,6 @@ const ApplyJobs = () => {
 
     setLoadingMatch(true);
     try {
-      // const token = await getToken();
       const { data } = await axios.post(
         backendUrl + "/api/ai/match-resume",
         { jobId: id },
@@ -74,6 +70,11 @@ const ApplyJobs = () => {
     }
   };
 
+  const isExternal = jobData?.source === "adzuna";
+  const companyName =
+    jobData?.companyId?.name || jobData?.companyName || "Company";
+  const companyLogo = jobData?.companyId?.image || jobData?.companyLogo;
+
   const applyHandler = async () => {
     try {
       if (!userData) {
@@ -83,8 +84,6 @@ const ApplyJobs = () => {
         navigate("/applications");
         return toast.error("Upload your resume first");
       }
-
-      // const token = await getToken();
 
       const { data } = await axios.post(
         backendUrl + "/api/users/apply",
@@ -127,18 +126,32 @@ const ApplyJobs = () => {
         <div className="bg-white text-black rounded-lg w-full">
           <div className=" px-15 py-20 flex items-center flex-col sm:flex-row justify-between bg-blue-50/90 border border-blue-200 rounded-lg gap-5 flex-wrap">
             <div className="flex max-sm:flex-col max-sm:items-center max-sm:text-center gap-5 flex-wrap">
-              <img
-                className="size-20 p-3 border bg-white border-gray-300 rounded max-sm:mx-auto"
-                src={jobData.companyId.image}
-                alt=""
-              />
+              {companyLogo ? (
+                <img
+                  className="size-20 p-3 border bg-white border-gray-300 rounded max-sm:mx-auto"
+                  src={companyLogo}
+                  alt=""
+                />
+              ) : (
+                <div className="size-20 p-3 border bg-gray-50 border-gray-300 rounded max-sm:mx-auto flex items-center justify-center">
+                  <Building2 className="size-8 text-gray-400" />
+                </div>
+              )}
               <div className="flex flex-col justify-between py-1 flex-wrap max-sm:items-center">
-                <h1 className="text-3xl font-medium">{jobData.title}</h1>
+                <div className="flex items-center gap-3 flex-wrap">
+                  <h1 className="text-3xl font-medium">{jobData.title}</h1>
+                  {isExternal && (
+                    <span className="flex items-center gap-1 text-xs bg-amber-50 border text-amber-700 border-amber-200 px-2 py-1 rounded">
+                      <ExternalLink className="size-3" /> External listing
+                    </span>
+                  )}
+                </div>
                 <div className="flex gap-4 flex-wrap max-sm:justify-center">
                   <span className="flex gap-1 text-gray-500 items-center">
                     <BriefcaseBusiness className="size-5" />
-                    <p>{jobData.companyId.name}</p>
+                    <p>{companyName}</p>
                   </span>
+
                   <span className="flex gap-1 text-gray-500 items-center">
                     <MapPin className="size-5" />
                     <p>{jobData.location}</p>
@@ -156,12 +169,24 @@ const ApplyJobs = () => {
             </div>
 
             <div className="flex flex-col gap-3">
-              <button
-                onClick={applyHandler}
-                className={` px-10 py-2 ${isAlreadyApplied ? "bg-blue-300 text-black" : "bg-blue-600 text-white"}  text-sm rounded `}
-              >
-                {isAlreadyApplied ? "Already applied" : "Apply now"}
-              </button>
+              {isExternal ? (
+                <a
+                  href={jobData.sourceUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="px-10 py-2 bg-blue-600 text-white text-sm rounded inline-block text-center"
+                >
+                  Apply on original site
+                </a>
+              ) : (
+                <button
+                  onClick={applyHandler}
+                  className={` px-10 py-2 ${isAlreadyApplied ? "bg-blue-300 text-black" : "bg-blue-600 text-white"}  text-sm rounded `}
+                >
+                  {isAlreadyApplied ? "Already applied" : "Apply now"}
+                </button>
+              )}
+
               <button
                 onClick={checkMatch}
                 disabled={!userData?.resume || loadingMatch}
@@ -304,26 +329,27 @@ const ApplyJobs = () => {
             </div>
 
             {/* Right section more jobs */}
-            <div className="w-full lg:w-1/3 mt-8 lg:mt-0 lg:ml-8 space-y-5 ">
-              <h2>More jobs from {jobData.companyId.name}</h2>
-              {jobs
-                .filter(
-                  (job) =>
-                    job._id !== jobData._id &&
-                    job.companyId._id === jobData.companyId._id,
-                )
-                .filter((job) => {
-                  const appliedJobIds = new Set(
-                    userApplications.map((app) => app.jobId && app.jobId._id),
-                  );
-
-                  return !appliedJobIds.has(job._id);
-                })
-                .slice(0, 4)
-                .map((job, index) => (
-                  <JobCard key={index} job={job} />
-                ))}
-            </div>
+            {!isExternal && (
+              <div className="w-full lg:w-1/3 mt-8 lg:mt-0 lg:ml-8 space-y-5 ">
+                <h2>More jobs from {companyName}</h2>
+                {jobs
+                  .filter(
+                    (job) =>
+                      job._id !== jobData._id &&
+                      job.companyId?._id === jobData.companyId._id,
+                  )
+                  .filter((job) => {
+                    const appliedJobIds = new Set(
+                      userApplications.map((app) => app.jobId && app.jobId._id),
+                    );
+                    return !appliedJobIds.has(job._id);
+                  })
+                  .slice(0, 4)
+                  .map((job, index) => (
+                    <JobCard key={index} job={job} />
+                  ))}
+              </div>
+            )}
           </div>
         </div>
       </div>
