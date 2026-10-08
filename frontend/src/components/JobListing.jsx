@@ -16,6 +16,23 @@ const JobListing = () => {
   const [filteredJobs, setFilteredJobs] = useState(jobs);
   const [bookmarked, setBookmarked] = useState(false);
 
+  const JOBS_PER_PAGE = 6;
+
+  const getPageNumbers = (current, total) => {
+    if (total <= 7) return Array.from({ length: total }, (_, i) => i + 1);
+
+    const pages = [1];
+    const start = Math.max(2, current - 1);
+    const end = Math.min(total - 1, current + 1);
+
+    if (start > 2) pages.push("...");
+    for (let i = start; i <= end; i++) pages.push(i);
+    if (end < total - 1) pages.push("...");
+
+    pages.push(total);
+    return pages;
+  };
+
   const handleCategoryChange = (category) => {
     setSelectedCategories((prev) =>
       selectedCategories.includes(category)
@@ -60,11 +77,14 @@ const JobListing = () => {
           matchesTitle(job),
       );
 
-    const allValidJobs = bookmarked && userData?.bookmarkedJobs?.length
-  ? newFilteredJobs.filter((job) =>
-      userData.bookmarkedJobs.map(id => id.toString()).includes(job._id.toString())
-    )
-  : newFilteredJobs;
+    const allValidJobs =
+      bookmarked && userData?.bookmarkedJobs?.length
+        ? newFilteredJobs.filter((job) =>
+            userData.bookmarkedJobs
+              .map((id) => id.toString())
+              .includes(job._id.toString()),
+          )
+        : newFilteredJobs;
 
     // setFilteredJobs(newFilteredJobs);
     setFilteredJobs(allValidJobs);
@@ -77,6 +97,8 @@ const JobListing = () => {
     bookmarked,
     userData,
   ]);
+
+  const totalPages = Math.ceil(filteredJobs.length / JOBS_PER_PAGE);
 
   return (
     <div className="container 2xl:px-20 mx-auto flex flex-col lg:flex-row max-lg:space-y-8 py-8">
@@ -121,16 +143,15 @@ const JobListing = () => {
           {showFilter ? "Close" : "Filters"}
         </button>
 
-        
-          <div className={showFilter ? "flex flex-row " : "max-lg:hidden"}>
-            <input
-              type="checkbox"
-              name="bookmark"
-              checked={bookmarked}
-              onChange={() => setBookmarked((prev) => !prev)}
-            />{" "}
-            Bookmarked Jobs
-          </div>
+        <div className={showFilter ? "flex flex-row " : "max-lg:hidden"}>
+          <input
+            type="checkbox"
+            name="bookmark"
+            checked={bookmarked}
+            onChange={() => setBookmarked((prev) => !prev)}
+          />{" "}
+          Bookmarked Jobs
+        </div>
 
         {/* Category filter */}
         <div className={showFilter ? "" : "max-lg:hidden"}>
@@ -184,40 +205,51 @@ const JobListing = () => {
         </div>
 
         {/* Pagination */}
-        {filteredJobs.length > 0 && (
-          <div className="flex items-center justify-center space-x-2 mt-10">
+        {totalPages > 1 && (
+          <div className="flex items-center justify-center flex-wrap gap-2 mt-10">
             <a href="#job-list">
-              {" "}
               <ArrowLeft
+                className={
+                  currentPage === 1 ? "text-gray-300" : "cursor-pointer"
+                }
                 onClick={() =>
                   currentPage !== 1 && setCurrentPage(currentPage - 1)
                 }
-              />{" "}
+              />
             </a>
-            {Array.from({ length: Math.ceil(filteredJobs.length / 6) }).map(
-              (_, index) => (
-                <a key={index} href="#job-list">
+
+            {getPageNumbers(currentPage, totalPages).map((page, index) =>
+              page === "..." ? (
+                <span key={`dots-${index}`} className="px-1 text-gray-400">
+                  …
+                </span>
+              ) : (
+                <a key={page} href="#job-list">
                   <button
-                    onClick={() => setCurrentPage(index + 1)}
+                    onClick={() => setCurrentPage(page)}
                     className={`size-10 flex items-center justify-center border border-gray-300 rounded ${
-                      currentPage === index + 1
+                      currentPage === page
                         ? "bg-blue-100 text-blue-500"
                         : "text-gray-500"
                     }`}
                   >
-                    {index + 1}
+                    {page}
                   </button>
                 </a>
               ),
             )}
+
             <a href="#job-list">
-              {" "}
               <ArrowRight
-                onClick={() =>
-                  currentPage !== Math.ceil(filteredJobs.length / 6) &&
-                  setCurrentPage(currentPage + 1)
+                className={
+                  currentPage === totalPages
+                    ? "text-gray-300"
+                    : "cursor-pointer"
                 }
-              />{" "}
+                onClick={() =>
+                  currentPage !== totalPages && setCurrentPage(currentPage + 1)
+                }
+              />
             </a>
           </div>
         )}
